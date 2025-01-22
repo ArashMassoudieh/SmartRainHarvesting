@@ -5,6 +5,8 @@
 #include <QMap>
 #include <QTimer>
 #include <DistanceSensor.h>
+#include <QSplitter>
+#include <QLabel>
 
 //QT_CHARTS_USE_NAMESPACE
 
@@ -18,17 +20,27 @@ SmartRainHarvest::SmartRainHarvest(QWidget *parent)
     //Latitude 38.9072° N
     //Longitude: 77.0369 W
 
+    QSplitter *splitter = new QSplitter(Qt::Vertical, this);
+
+
+
     QTimer *CheckWeatherTimer = new QTimer();
+
 
     connect(CheckWeatherTimer,SIGNAL(timeout()), this, SLOT(on_Check_Timer()));
     connect(ReleaseTimer,SIGNAL(timeout()), this, SLOT(on_Check_Distance()));
 
     CheckWeatherTimer->start(5000);
 
-    ui->gridLayout->addWidget(ProbnQuanChartContainer->GetChartView(),0,0);
-    ui->gridLayout->addWidget(CummulativeForcastChartContainer->GetChartView(),1,0);
-    ui->gridLayout->addWidget(WaterDepthChartContainer->GetChartView(),2,0);
+    splitter->addWidget(ProbnQuanChartContainer->GetChartView());
+    splitter->addWidget(CummulativeForcastChartContainer->GetChartView());
+    splitter->addWidget(WaterDepthChartContainer->GetChartView());
 
+    splitter->setStretchFactor(0, 1);
+    splitter->setStretchFactor(1, 1);
+    splitter->setStretchFactor(2, 1);
+
+    setCentralWidget(splitter);
     distancesensor.initialize();
     on_Check_Timer();
 
@@ -57,8 +69,6 @@ void SmartRainHarvest::on_Check_Timer()
     ProbnQuanChartContainer->plotWeatherDataMap(precip_data);
     ProbnQuanChartContainer->GetChartView()->setRenderHint(QPainter::Antialiasing);
 
-    ui->gridLayout->addWidget(ProbnQuanChartContainer->GetChartView(),0,0);
-
     if (cummulativerain.count()>30) cummulativerain.removeFirst();
 
     cummulativerain.append({QDateTime::currentDateTime(),calculateCumulativeValue(rainamountdata,2) });
@@ -66,7 +76,7 @@ void SmartRainHarvest::on_Check_Timer()
 
     double distance = distancesensor.getDistance();
 
-    if (depth.count()>30) cummulativerain.removeFirst();
+    if (depth.count()>30) depth.removeFirst();
     depth.append({QDateTime::currentDateTime(), max_distance - distance});
     WaterDepthChartContainer->plotWeatherData(depth, "Water Depth (cm)");
 
@@ -92,7 +102,7 @@ void SmartRainHarvest::StartRelease()
 void SmartRainHarvest::on_Check_Distance()
 {
     double distance = distancesensor.getDistance();
-    if (depth.count()>30) cummulativerain.removeFirst();
+    if (depth.count()>30) depth.removeFirst();
     depth.append({QDateTime::currentDateTime(), max_distance - distance});
     WaterDepthChartContainer->plotWeatherData(depth, "Water Depth (cm)");
     if (depth.last().value<(overflow?depthtoreleaseto:minumumdepth))
@@ -113,4 +123,5 @@ void SmartRainHarvest::OpenTheValve(){
 void SmartRainHarvest::ShutTheValve(){
 
 }
+
 
