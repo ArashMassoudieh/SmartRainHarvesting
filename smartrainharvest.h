@@ -31,7 +31,7 @@ public:
     double bypassdepthcriteria = 100; //If the water depth in the tank exceeds this, water will be released (cm)
     double depthtoreleaseto = 75; // When above occures, water will be released to this depth (cm)
     double minumumdepth = 5; //When rain is in forecast, water will be released to this depth (cm)
-    int Check_Weather_Interval = 5000;
+    int Check_Weather_Interval = 5; //Time interval to check the weather and decide on opening or shutting the valve in seconds
     void StartRelease();
 private:
     Ui::SmartRainHarvest *ui;

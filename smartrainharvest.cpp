@@ -33,7 +33,7 @@ SmartRainHarvest::SmartRainHarvest(QWidget *parent)
     connect(CheckWeatherTimer,SIGNAL(timeout()), this, SLOT(on_Check_Timer()));
     connect(ReleaseTimer,SIGNAL(timeout()), this, SLOT(on_Check_Distance()));
 
-    CheckWeatherTimer->start(Check_Weather_Interval);
+    CheckWeatherTimer->start(Check_Weather_Interval*1000);
 
 
     splitter->addWidget(ProbnQuanChartContainer->GetChartView());
@@ -153,12 +153,13 @@ void SmartRainHarvest::on_Check_Distance()
 void SmartRainHarvest::OpenTheValve(){
 
     digitalWrite(18, HIGH);
+    qDebug()<<"The valve is now open";
 }
 
 void SmartRainHarvest::ShutTheValve(){
 
     digitalWrite(18, LOW);
-
+    qDebug()<<"The valve is now shut";
 }
 
 void SmartRainHarvest::on_ManualOpenShut()
@@ -173,6 +174,11 @@ void SmartRainHarvest::on_ManualOpenShut()
         OpenTheValve();
         state = true;
     }
+    if (!state)
+        ManualOpenShut->setText("Open the Valve");
+    else
+        ManualOpenShut->setText("Shut the Valve");
+
     if (openshut.count()>100) openshut.removeFirst();
     openshut.append({QDateTime::currentDateTime(), double(int(state))});
     OpenShutChartContainer->plotWeatherData(openshut, "Valve State (on/off)");
