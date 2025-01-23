@@ -8,6 +8,7 @@
 #include <QSplitter>
 #include <QLabel>
 #include <QPushButton>
+#include <wiringPi.h>
 
 //QT_CHARTS_USE_NAMESPACE
 
@@ -151,9 +152,12 @@ void SmartRainHarvest::on_Check_Distance()
 
 void SmartRainHarvest::OpenTheValve(){
 
+    digitalWrite(18, HIGH);
 }
 
 void SmartRainHarvest::ShutTheValve(){
+
+    digitalWrite(18, LOW);
 
 }
 

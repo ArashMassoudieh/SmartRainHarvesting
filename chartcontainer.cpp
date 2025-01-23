@@ -1,8 +1,11 @@
 #include "chartcontainer.h"
 
+using namespace QtCharts;
+
 ChartContainer::ChartContainer()
 {
-
+    for (int i=0; i<10; i++)
+        colors.append(QColor(rand()%256,rand()%256,rand()%256));
 }
 
 void ChartContainer::plotWeatherData(const QVector<WeatherData>& weatherData, const QString& yAxisTitle) {
@@ -17,7 +20,7 @@ void ChartContainer::plotWeatherData(const QVector<WeatherData>& weatherData, co
 
         QPen pen = series->pen();
         pen.setWidth(4); // Set the desired line thickness
-        pen.setColor(QColor(rand()%256,rand()%256,rand()%256));
+        pen.setColor(colors[0]);
         series->setPen(pen);
 
         // Create the chart
@@ -90,7 +93,9 @@ void ChartContainer::plotWeatherDataMap(const QMap<QString, QVector<WeatherData>
         chart->addAxis(axisX, Qt::AlignBottom);
 
         // Add series for each key in the map
+        int counter = 0;
         for (auto it = weatherDataMap.begin(); it != weatherDataMap.end(); ++it) {
+            counter++;
             const QString& yAxisTitle = it.key();
             const QVector<WeatherData>& weatherData = it.value();
 
@@ -104,7 +109,7 @@ void ChartContainer::plotWeatherDataMap(const QMap<QString, QVector<WeatherData>
 
             QPen pen = series->pen();
             pen.setWidth(4); // Set the desired line thickness
-            pen.setColor(QColor(rand()%256,rand()%256,rand()%256));
+            pen.setColor(colors[counter]);
             series->setPen(pen);
 
             // Add the series to the chart

@@ -24,12 +24,13 @@ public:
     QVector<WeatherData> cummulativerain;
     QVector<WeatherData> depth;
     QVector<WeatherData> openshut;
-    double max_distance = 100;
-    double waterdepthcriteria = 50;
-    double cummulativeraincriteria = 50;
-    double bypassdepthcriteria = 100;
-    double depthtoreleaseto = 75;
-    double minumumdepth = 5;
+    // These parameters need to be adjusted
+    double max_distance = 100; //Distance to the bottom of the barrel (cm)
+    double waterdepthcriteria = 50; //If there is a rain in the forecast and water depth is higher than this, the valve will open (cm)
+    double cummulativeraincriteria = 50; //This is how much to rain within the next two days so we consider rain in the forecast (mm)
+    double bypassdepthcriteria = 100; //If the water depth in the tank exceeds this, water will be released (cm)
+    double depthtoreleaseto = 75; // When above occures, water will be released to this depth (cm)
+    double minumumdepth = 5; //When rain is in forecast, water will be released to this depth (cm)
     int Check_Weather_Interval = 5000;
     void StartRelease();
 private:

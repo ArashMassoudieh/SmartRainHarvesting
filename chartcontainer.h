@@ -8,17 +8,19 @@
 
 #include "noaaweatherfetcher.h"
 
+
 class ChartContainer
 {
 public:
     ChartContainer();
     void plotWeatherData(const QVector<WeatherData>& weatherData, const QString& yAxisTitle);
     void plotWeatherDataMap(const QMap<QString, QVector<WeatherData>>& weatherDataMap);
-    QChartView *GetChartView() {return chartview;}
+    QtCharts::QChartView *GetChartView() {return chartview;}
 private:
-    QChart *chart = new QChart();
-    QChartView *chartview = new QChartView();
+    QtCharts::QChart *chart = new QtCharts::QChart();
+    QtCharts::QChartView *chartview = new QtCharts::QChartView();
     void removeAllAxes();
+    QVector<QColor> colors;
 };
 
 #endif // CHARTCONTAINER_H
