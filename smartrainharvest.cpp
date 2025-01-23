@@ -7,6 +7,7 @@
 #include <DistanceSensor.h>
 #include <QSplitter>
 #include <QLabel>
+#include <QPushButton>
 
 //QT_CHARTS_USE_NAMESPACE
 
@@ -24,21 +25,36 @@ SmartRainHarvest::SmartRainHarvest(QWidget *parent)
 
 
 
+
     QTimer *CheckWeatherTimer = new QTimer();
 
 
     connect(CheckWeatherTimer,SIGNAL(timeout()), this, SLOT(on_Check_Timer()));
     connect(ReleaseTimer,SIGNAL(timeout()), this, SLOT(on_Check_Distance()));
 
-    CheckWeatherTimer->start(5000);
+    CheckWeatherTimer->start(Check_Weather_Interval);
+
 
     splitter->addWidget(ProbnQuanChartContainer->GetChartView());
-    splitter->addWidget(CummulativeForcastChartContainer->GetChartView());
-    splitter->addWidget(WaterDepthChartContainer->GetChartView());
+    QSplitter *hsplitter = new QSplitter(Qt::Horizontal, splitter);
+    hsplitter->addWidget(CummulativeForcastChartContainer->GetChartView());
+    hsplitter->addWidget(WaterDepthChartContainer->GetChartView());
+    splitter->addWidget(OpenShutChartContainer->GetChartView());
 
+    QWidget* layoutWidget1 = new QWidget(hsplitter);
+    QVBoxLayout *buttonslayout = new QVBoxLayout(layoutWidget1);
+    ManualOpenShut = new QPushButton(splitter);
+    buttonslayout->addWidget(ManualOpenShut);
+    ManualOpenShut->setText("Open Valve");
+
+    connect(ManualOpenShut, SIGNAL(clicked()),this, SLOT(on_ManualOpenShut()) );
     splitter->setStretchFactor(0, 1);
     splitter->setStretchFactor(1, 1);
     splitter->setStretchFactor(2, 1);
+    hsplitter->setStretchFactor(0, 3);
+    hsplitter->setStretchFactor(1, 3);
+    hsplitter->setStretchFactor(2, 1);
+
 
     setCentralWidget(splitter);
     distancesensor.initialize();
@@ -92,6 +108,15 @@ void SmartRainHarvest::on_Check_Timer()
         StartRelease();
     }
 
+
+    if (openshut.count()>100) openshut.removeFirst();
+    openshut.append({QDateTime::currentDateTime(), double(int(state))});
+    OpenShutChartContainer->plotWeatherData(openshut, "Valve State (on/off)");
+    if (!state)
+        ManualOpenShut->setText("Open the Valve");
+    else
+        ManualOpenShut->setText("Shut the Valve");
+
 }
 
 void SmartRainHarvest::StartRelease()
@@ -105,14 +130,22 @@ void SmartRainHarvest::on_Check_Distance()
     if (depth.count()>30) depth.removeFirst();
     depth.append({QDateTime::currentDateTime(), max_distance - distance});
     WaterDepthChartContainer->plotWeatherData(depth, "Water Depth (cm)");
+
+
+    if (openshut.count()>100) openshut.removeFirst();
+    openshut.append({QDateTime::currentDateTime(), double(state)});
+    OpenShutChartContainer->plotWeatherData(openshut, "Valve State (on/off");
+
     if (depth.last().value<(overflow?depthtoreleaseto:minumumdepth))
     {
         ReleaseTimer->stop();
         ShutTheValve();
+        state = false;
     }
     else
     {
         OpenTheValve();
+        state=true;
     }
 }
 
@@ -122,6 +155,23 @@ void SmartRainHarvest::OpenTheValve(){
 
 void SmartRainHarvest::ShutTheValve(){
 
+}
+
+void SmartRainHarvest::on_ManualOpenShut()
+{
+    if (state)
+    {
+        ShutTheValve();
+        state = false;
+    }
+    else
+    {
+        OpenTheValve();
+        state = true;
+    }
+    if (openshut.count()>100) openshut.removeFirst();
+    openshut.append({QDateTime::currentDateTime(), double(int(state))});
+    OpenShutChartContainer->plotWeatherData(openshut, "Valve State (on/off)");
 }
 
 
